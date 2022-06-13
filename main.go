@@ -17,22 +17,22 @@ type Arguments map[string]string
 
 func Perform(args Arguments, writer io.Writer) error {
 	if args["operation"] == "add" {
-		err := AddNewItem(args)
+		err := AddNewItem(args, writer)
 		if err != nil {
 			return err
 		}
 	} else if args["operation"] == "list" {
-		err := GetInfo(args)
+		err := GetInfo(args, writer)
 		if err != nil {
 			return err
 		}
 	} else if args["operation"] == "findById" {
-		err := FindByID(args)
+		err := FindByID(args, writer)
 		if err != nil {
 			return err
 		}
 	} else if args["operation"] == "remove" {
-		err := RemoveUser(args)
+		err := RemoveUser(args, writer)
 		if err != nil {
 			return err
 		}
@@ -67,18 +67,18 @@ func parseArgs() Arguments {
 	return mp
 }
 
-func GetInfo(args Arguments) error {
+func GetInfo(args Arguments, writer io.Writer) error {
 	return nil
 }
 
-func AddNewItem(args Arguments) error {
+func AddNewItem(args Arguments, writer io.Writer) error {
 	return nil
 }
 
-func RemoveUser(args Arguments) error {
+func RemoveUser(args Arguments, writer io.Writer) error {
 	return nil
 }
 
-func FindByID(args Arguments) error {
+func FindByID(args Arguments, writer io.Writer) error {
 	return nil
 }
