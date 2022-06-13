@@ -1,16 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 )
 
 var (
 	operationMissingErr = errors.New("-operation flag has to be specified")
 	fileNameMissingErr  = errors.New("-fileName flag has to be specified")
+	idMissingErr        = errors.New("-id flag has to be specified")
 )
 
 type Arguments map[string]string
@@ -72,7 +75,7 @@ func GetInfo(args Arguments, writer io.Writer) error {
 	if len(fileName) == 0 {
 		return fileNameMissingErr
 	}
-	file, err := os.Open(fileName)
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -97,6 +100,55 @@ func RemoveUser(args Arguments, writer io.Writer) error {
 	return nil
 }
 
+type User struct {
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+	Age   int    `json:"age"`
+}
+
 func FindByID(args Arguments, writer io.Writer) error {
+	input := []User{}
+	id := args["id"]
+	fileName := args["fileName"]
+	if len(id) == 0 {
+		return idMissingErr
+	}
+	if len(fileName) == 0 {
+		return fileNameMissingErr
+	}
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &input)
+	if err != nil {
+		return err
+	}
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+	ind := 0
+	check := false
+	for index, i := range input {
+		if userId == i.Id {
+			ind = index
+			check = true
+		}
+	}
+	if !check {
+		writer.Write([]byte(""))
+		return nil
+	}
+	out, err := json.Marshal(input[ind])
+	if err != nil {
+		return err
+	}
+	out = append(out, '\n')
+	writer.Write(out)
 	return nil
 }
