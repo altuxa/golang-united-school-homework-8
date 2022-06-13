@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 )
@@ -15,6 +16,33 @@ var (
 type Arguments map[string]string
 
 func Perform(args Arguments, writer io.Writer) error {
+	if args["operation"] == "add" {
+		err := AddNewItem(args)
+		if err != nil {
+			return err
+		}
+	} else if args["operation"] == "list" {
+		err := GetInfo(args)
+		if err != nil {
+			return err
+		}
+	} else if args["operation"] == "findById" {
+		err := FindByID(args)
+		if err != nil {
+			return err
+		}
+	} else if args["operation"] == "remove" {
+		err := RemoveUser(args)
+		if err != nil {
+			return err
+		}
+	} else if len(args["operation"]) == 0 {
+		return operationMissingErr
+	} else {
+		return fmt.Errorf("Operation %s not allowed!", args["operation"])
+	}
+
+	return nil
 }
 
 func main() {
@@ -39,14 +67,18 @@ func parseArgs() Arguments {
 	return mp
 }
 
-func GetInfo() {
+func GetInfo(args Arguments) error {
+	return nil
 }
 
 func AddNewItem(args Arguments) error {
+	return nil
 }
 
-func RemoveUser() {
+func RemoveUser(args Arguments) error {
+	return nil
 }
 
-func FindByID() {
+func FindByID(args Arguments) error {
+	return nil
 }
