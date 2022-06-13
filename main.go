@@ -68,6 +68,24 @@ func parseArgs() Arguments {
 }
 
 func GetInfo(args Arguments, writer io.Writer) error {
+	fileName := args["fileName"]
+	if len(fileName) == 0 {
+		return fileNameMissingErr
+	}
+	file, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	data = append(data, '\n')
+	writer.Write(data)
 	return nil
 }
 
