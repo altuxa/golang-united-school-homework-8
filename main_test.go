@@ -7,8 +7,10 @@ import (
 	"testing"
 )
 
-const fileName = "test.json"
-const filePermission = 0644
+const (
+	fileName       = "test.json"
+	filePermission = 0644
+)
 
 // Common validation tests
 func TestOperationMissingError(t *testing.T) {
@@ -193,7 +195,6 @@ func TestAddingOperation(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	file, err := os.OpenFile(fileName, os.O_RDONLY, filePermission)
 	defer file.Close()
 
