@@ -7,14 +7,20 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 )
 
 var (
 	operationMissingErr = errors.New("-operation flag has to be specified")
 	fileNameMissingErr  = errors.New("-fileName flag has to be specified")
 	idMissingErr        = errors.New("-id flag has to be specified")
+	itemMissingErr      = errors.New("-item flag has to be specified")
 )
+
+type User struct {
+	Id    string `json:"id"`
+	Email string `json:"email"`
+	Age   int    `json:"age"`
+}
 
 type Arguments map[string]string
 
@@ -87,23 +93,55 @@ func GetInfo(args Arguments, writer io.Writer) error {
 	if len(data) == 0 {
 		return nil
 	}
-	data = append(data, '\n')
 	writer.Write(data)
 	return nil
 }
 
 func AddNewItem(args Arguments, writer io.Writer) error {
+	fileName := args["fileName"]
+	item := args["item"]
+	if len(fileName) == 0 {
+		return fileNameMissingErr
+	}
+	if len(item) == 0 {
+		return itemMissingErr
+	}
+	input := User{}
+	oldData := []User{}
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	err = json.Unmarshal([]byte(item), &input)
+	if err != nil {
+		return err
+	}
+	if check := IsValid(input); !check {
+		return errors.New("invalid input")
+	}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &oldData)
+	if err != nil {
+		return err
+	}
+	oldData = append(oldData, input)
+	out, err := json.Marshal(oldData)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(fileName, out, 0644)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func RemoveUser(args Arguments, writer io.Writer) error {
 	return nil
-}
-
-type User struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-	Age   int    `json:"age"`
 }
 
 func FindByID(args Arguments, writer io.Writer) error {
@@ -128,14 +166,10 @@ func FindByID(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
-	userId, err := strconv.Atoi(id)
-	if err != nil {
-		return err
-	}
 	ind := 0
 	check := false
 	for index, i := range input {
-		if userId == i.Id {
+		if id == i.Id {
 			ind = index
 			check = true
 		}
@@ -148,7 +182,19 @@ func FindByID(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
-	out = append(out, '\n')
 	writer.Write(out)
 	return nil
+}
+
+func IsValid(u User) bool {
+	if u.Age == 0 {
+		return false
+	}
+	if len(u.Email) == 0 {
+		return false
+	}
+	if len(u.Id) == 0 {
+		return false
+	}
+	return true
 }
