@@ -141,6 +141,50 @@ func AddNewItem(args Arguments, writer io.Writer) error {
 }
 
 func RemoveUser(args Arguments, writer io.Writer) error {
+	fileName := args["fileName"]
+	id := args["id"]
+	fileBody := []User{}
+	check := false
+	newData := []User{}
+	if len(fileName) == 0 {
+		return fileNameMissingErr
+	}
+	if len(id) == 0 {
+		return idMissingErr
+	}
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &fileBody)
+	if err != nil {
+		return err
+	}
+	for _, i := range fileBody {
+		if i.Id == id {
+			check = true
+		} else if i.Id != id {
+			newData = append(newData, i)
+		}
+	}
+	if !check {
+		str := fmt.Sprintf("Item with id %s not found", id)
+		writer.Write([]byte(str))
+		return nil
+	}
+	afterRemove, err := json.Marshal(newData)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(fileName, afterRemove, 0644)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
