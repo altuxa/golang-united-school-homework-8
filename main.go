@@ -128,6 +128,12 @@ func AddNewItem(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
+	for _, i := range oldData {
+		if i.Id == input.Id {
+			str := fmt.Sprintf("Item with id %s already exists", input.Id)
+			return errors.New(str)
+		}
+	}
 	oldData = append(oldData, input)
 	out, err := json.Marshal(oldData)
 	if err != nil {
@@ -185,6 +191,7 @@ func RemoveUser(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 	return nil
 }
 
@@ -202,6 +209,7 @@ func FindByID(args Arguments, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return err
